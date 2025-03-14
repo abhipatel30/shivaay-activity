@@ -33,10 +33,12 @@
         window.query = query;
         window.setDoc = setDoc;
     </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body {
-            background: linear-gradient(to right, #ffecd2, #fcb69f);
-            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
         }
         .container {
             max-width: 600px;
@@ -44,7 +46,16 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
         }
         .hidden {
             display: none;
@@ -54,18 +65,23 @@
         function showActivityFields() {
             let activity = document.getElementById("activity").value;
             document.getElementById("activityFields").classList.remove("hidden");
-
             document.querySelectorAll(".activity-input").forEach(el => el.classList.add("hidden"));
-
             if (activity) {
                 document.getElementById(activity + "Field").classList.remove("hidden");
             }
         }
+        document.addEventListener("DOMContentLoaded", function() {
+            flatpickr(".timepicker", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "h:i K"
+            });
+        });
     </script>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center text-primary">Shivaay's Activity Tracker</h2>
+        <h2>Shivaay's Activity Tracker</h2>
         <label for="activity" class="form-label">Select Activity:</label>
         <select id="activity" class="form-select" onchange="showActivityFields()">
             <option value="">Select</option>
@@ -76,33 +92,12 @@
             <option value="poop">Poop Time</option>
             <option value="medicine">Medicine Given</option>
         </select>
-
         <div id="activityFields" class="hidden mt-3">
             <label for="date" class="form-label">Date:</label>
             <input type="date" id="date" class="form-control" required>
-
-            <div id="eatingField" class="hidden mt-3 activity-input">
-                <label>Eating:</label>
-                <select id="eating" class="form-select"></select>
-                <input type="text" id="newFood" class="form-control mt-2" placeholder="Add new food">
-                <button class="btn btn-primary mt-2" onclick="addNewFood()">Add Food</button>
-            </div>
-            
-            <div id="medicineField" class="hidden mt-3 activity-input">
-                <label>Medicine Given:</label>
-                <div id="medicineList"></div>
-                <input type="text" id="newMedicine" class="form-control mt-2" placeholder="Add new medicine">
-                <button class="btn btn-primary mt-2" onclick="addNewMedicine()">Add Medicine</button>
-            </div>
-            
-            <input type="text" id="diaperField" class="form-control hidden mt-3 activity-input timepicker" placeholder="Select Time">
-            <input type="text" id="sleepField" class="form-control hidden mt-3 activity-input timepicker" placeholder="Select Time">
-            <input type="text" id="wakeField" class="form-control hidden mt-3 activity-input timepicker" placeholder="Select Time">
-            <input type="text" id="poopField" class="form-control hidden mt-3 activity-input timepicker" placeholder="Select Time">
-            
+            <input type="text" id="time" class="form-control timepicker mt-3" placeholder="Select Time">
             <button class="btn btn-success mt-3" onclick="logActivity()">Log Activity</button>
         </div>
-        
         <table class="table table-bordered table-striped mt-4">
             <thead>
                 <tr>
@@ -115,17 +110,15 @@
             <tbody id="activityLog"></tbody>
         </table>
     </div>
-    
     <script type="module">
         async function logActivity() {
             let date = document.getElementById("date").value;
             let activity = document.getElementById("activity").value;
-            let time = new Date().toLocaleTimeString();
-            if (!date || !activity) return;
+            let time = document.getElementById("time").value;
+            if (!date || !activity || !time) return;
             await addDoc(collection(db, "activities"), { date, activity, time });
             loadActivities();
         }
-
         async function loadActivities() {
             const snapshot = await getDocs(query(collection(db, "activities"), orderBy("date", "desc")));
             let activityLog = document.getElementById("activityLog");
@@ -135,16 +128,12 @@
                 activityLog.innerHTML += `<tr><td>${data.date}</td><td>${data.time}</td><td>${data.activity}</td><td><button class='btn btn-danger btn-sm' onclick='deleteActivity("${docSnap.id}")'>Delete</button></td></tr>`;
             });
         }
-
         async function deleteActivity(id) {
             await deleteDoc(doc(db, "activities", id));
             loadActivities();
         }
-
         document.addEventListener("DOMContentLoaded", () => {
             loadActivities();
-            loadFoodItems();
-            loadMedicineItems();
         });
     </script>
 </body>
