@@ -116,6 +116,11 @@
     </div>
     
     <script type="module">
+        window.deleteActivity = async function(docId) {
+            await deleteDoc(doc(db, "activities", docId));
+            loadActivities();
+        };
+
         async function logActivity() {
             let date = document.getElementById("date").value;
             let activity = document.getElementById("activity").value;
@@ -143,11 +148,6 @@
                     <td><button class='btn btn-danger' onclick='deleteActivity("${docId}")'>Delete</button></td>
                 </tr>`;
             });
-        }
-        
-        async function deleteActivity(docId) {
-            await deleteDoc(doc(db, "activities", docId));
-            loadActivities();
         }
 
         document.addEventListener("DOMContentLoaded", loadActivities);
