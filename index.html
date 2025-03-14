@@ -64,10 +64,13 @@
     <script>
         function showActivityFields() {
             let activity = document.getElementById("activity").value;
-            document.getElementById("activityFields").classList.remove("hidden");
+            let activityFields = document.getElementById("activityFields");
+            if (!activityFields) return;
+            activityFields.classList.remove("hidden");
             document.querySelectorAll(".activity-input").forEach(el => el.classList.add("hidden"));
-            if (activity) {
-                document.getElementById(activity + "Field").classList.remove("hidden");
+            let selectedField = document.getElementById(activity + "Field");
+            if (selectedField) {
+                selectedField.classList.remove("hidden");
             }
         }
         document.addEventListener("DOMContentLoaded", function() {
@@ -76,7 +79,12 @@
                 noCalendar: true,
                 dateFormat: "h:i K"
             });
+            loadFoodItems();
         });
+
+        function loadFoodItems() {
+            console.log("Loading food items...");
+        }
     </script>
 </head>
 <body>
