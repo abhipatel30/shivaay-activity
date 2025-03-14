@@ -117,41 +117,32 @@
     </div>
     
     <script type="module">
-        async function addNewFood() {
-            let newFood = document.getElementById("newFood").value;
-            if (!newFood) return;
-            await setDoc(doc(db, "foods", newFood), { name: newFood });
-            loadFoodItems();
+        async function logActivity() {
+            let date = document.getElementById("date").value;
+            let activity = document.getElementById("activity").value;
+            let detail = document.getElementById(activity + "Field")?.value || "N/A";
+            if (!date || !activity) return;
+            await addDoc(collection(db, "activities"), { date, activity, detail });
+            loadActivities();
         }
 
-        async function addNewMedicine() {
-            let newMedicine = document.getElementById("newMedicine").value;
-            if (!newMedicine) return;
-            await setDoc(doc(db, "medicines", newMedicine), { name: newMedicine });
-            loadMedicineItems();
-        }
-
-        async function loadFoodItems() {
-            const snapshot = await getDocs(collection(db, "foods"));
-            let eatingSelect = document.getElementById("eating");
-            eatingSelect.innerHTML = "";
+        async function loadActivities() {
+            const snapshot = await getDocs(collection(db, "activities"));
+            let activityLog = document.getElementById("activityLog");
+            activityLog.innerHTML = "";
             snapshot.forEach(docSnap => {
-                let food = docSnap.data().name;
-                eatingSelect.innerHTML += `<option value="${food}">${food}</option>`;
+                let data = docSnap.data();
+                activityLog.innerHTML += `<tr><td>${data.date}</td><td>${data.detail}</td><td>${data.activity}</td><td><button class='btn btn-danger btn-sm' onclick='deleteActivity("${docSnap.id}")'>Delete</button></td></tr>`;
             });
         }
 
-        async function loadMedicineItems() {
-            const snapshot = await getDocs(collection(db, "medicines"));
-            let medicineList = document.getElementById("medicineList");
-            medicineList.innerHTML = "";
-            snapshot.forEach(docSnap => {
-                let medicine = docSnap.data().name;
-                medicineList.innerHTML += `<div>${medicine}</div>`;
-            });
+        async function deleteActivity(id) {
+            await deleteDoc(doc(db, "activities", id));
+            loadActivities();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            loadActivities();
             loadFoodItems();
             loadMedicineItems();
         });
