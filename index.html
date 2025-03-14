@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
@@ -26,6 +26,8 @@
         window.collection = collection;
         window.addDoc = addDoc;
         window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
         window.orderBy = orderBy;
         window.query = query;
     </script>
@@ -93,6 +95,7 @@
                     <th>Date</th>
                     <th>Time</th>
                     <th>Activity</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="activityLog"></tbody>
@@ -117,11 +120,24 @@
             const snapshot = await getDocs(q);
             let tbody = document.getElementById("activityLog");
             tbody.innerHTML = "";
-            snapshot.forEach(doc => {
-                let entry = doc.data();
-                tbody.innerHTML += `<tr><td>${entry.date}</td><td>${entry.time}</td><td>${entry.activity}</td></tr>`;
+            snapshot.forEach(docSnap => {
+                let entry = docSnap.data();
+                let docId = docSnap.id;
+                tbody.innerHTML += `<tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.time}</td>
+                    <td>${entry.activity}</td>
+                    <td><button class='btn btn-danger' onclick='deleteActivity("${docId}")'>Delete</button></td>
+                </tr>`;
             });
         }
+        
+        async function deleteActivity(docId) {
+            await deleteDoc(doc(db, "activities", docId));
+            loadActivities();
+        }
+
+        document.addEventListener("DOMContentLoaded", loadActivities);
     </script>
 </body>
 </html>
